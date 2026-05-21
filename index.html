@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Платформа для организации киберспортивных турниров и управления кланами. Автоматизация сеток, результатов и статистики.">
+    <title>TournamentHub - Организация турниров и кланов</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary-color: #06b6d4;
+            --accent-color: #8b5cf6;
+            --dark-bg: #0f172a;
+            --darker-bg: #020617;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --success: #10b981;
+            --gradient-1: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
+            --gradient-2: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 5px;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        nav.scrolled {
+            padding: 0.5rem 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-1);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%),
+                        url('https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1920') center/cover;
+            padding: 6rem 2rem 2rem;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid var(--primary-color);
+            border-radius: 50px;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 2rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-color);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+            color: var(--text-secondary);
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        /* Section Styles */
+        section {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-title p {
+            color: var(--text-secondary);
+            font-size: 1.125rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* About Section */
+        .about {
+            background: var(--gradient-2);
+            border-radius: 24px;
+            padding: 4rem;
+            margin: 4rem auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-text h3 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .about-text p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .about-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+        }
+
+        .stat-card i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .stat-card h4 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .stat-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Target Audience Section */
+        .audience-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .audience-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2.5rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .audience-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-1);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .audience-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: var(--primary-color);
+        }
+
+        .audience-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .audience-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        .audience-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .audience-card .goal {
+            color: var(--success);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .audience-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Features Section */
+        .features {
+            background: var(--darker-bg);
+            border-radius: 24px;
+            padding: 4rem;
+            margin: 4rem auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2.5rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 15px 35px rgba(99, 102, 241, 0.2);
+        }
+
+        .feature-card:hover::after {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            position: relative;
+        }
+
+        /* Advantages Section */
+        .advantages-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .advantage-item {
+            display: flex;
+            gap: 1.5rem;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .advantage-item:hover {
+            border-color: var(--primary-color);
+            transform: translateX(10px);
+        }
+
+        .advantage-icon {
+            min-width: 50px;
+            height: 50px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--success);
+            font-size: 1.25rem;
+        }
+
+        .advantage-content h4 {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .advantage-content p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Testimonials */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2.5rem;
+            border: 1px solid var(--border-color);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 6rem;
+            color: var(--primary-color);
+            opacity: 0.2;
+            font-family: serif;
+            line-height: 1;
+        }
+
+        .testimonial-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .testimonial-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--gradient-1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .testimonial-info h4 {
+            margin-bottom: 0.25rem;
+        }
+
+        .testimonial-info span {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .testimonial-stars {
+            color: #fbbf24;
+            margin-bottom: 1rem;
+        }
+
+        .testimonial-card p {
+            color: var(--text-secondary);
+            font-style: italic;
+            line-height: 1.8;
+        }
+
+        /* FAQ Section */
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--card-bg);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            border-color: var(--primary-color);
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .faq-question:hover {
+            color: var(--primary-color);
+        }
+
+        .faq-question i {
+            transition: transform 0.3s ease;
+            color: var(--primary-color);
+        }
+
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 0 1.5rem 1.5rem;
+            max-height: 500px;
+        }
+
+        /* Pricing Section */
+        .pricing {
+            background: var(--gradient-2);
+            border-radius: 24px;
+            padding: 4rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .pricing-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            border-radius: 50px;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            border: 1px solid var(--success);
+        }
+
+        .pricing h3 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .pricing .price {
+            font-size: 4rem;
+            font-weight: 800;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 2rem 0;
+        }
+
+        .pricing .price span {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin: 3rem 0;
+            display: inline-block;
+            text-align: left;
+        }
+
+        .pricing-features li {
+            padding: 0.75rem 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .pricing-features li i {
+            color: var(--success);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--darker-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 4rem 2rem 2rem;
+            margin-top: 6rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .footer-section p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .social-links a:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Scroll to Top Button */
+        .scroll-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            z-index: 999;
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .about {
+                padding: 2rem;
+            }
+
+            .features {
+                padding: 2rem;
+            }
+
+            .pricing {
+                padding: 2rem;
+            }
+
+            .pricing .price {
+                font-size: 3rem;
+            }
+
+            section {
+                padding: 4rem 1rem;
+            }
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            max-width: 300px;
+            height: 100vh;
+            background: var(--card-bg);
+            z-index: 1001;
+            padding: 6rem 2rem 2rem;
+            transition: right 0.3s ease;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .mobile-menu-links {
+            list-style: none;
+        }
+
+        .mobile-menu-links li {
+            margin-bottom: 1.5rem;
+        }
+
+        .mobile-menu-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: block;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="logo">TournamentHub</div>
+            <ul class="nav-links">
+                <li><a href="#about">О платформе</a></li>
+                <li><a href="#audience">Для кого</a></li>
+                <li><a href="#features">Возможности</a></li>
+                <li><a href="#pricing">Цена</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Открыть меню">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="overlay" onclick="toggleMobileMenu()"></div>
+    <div class="mobile-menu" id="mobileMenu">
+        <ul class="mobile-menu-links">
+            <li><a href="#about" onclick="toggleMobileMenu()">О платформе</a></li>
+            <li><a href="#audience" onclick="toggleMobileMenu()">Для кого</a></li>
+            <li><a href="#features" onclick="toggleMobileMenu()">Возможности</a></li>
+            <li><a href="#pricing" onclick="toggleMobileMenu()">Цена</a></li>
+            <li><a href="#faq" onclick="toggleMobileMenu()">FAQ</a></li>
+        </ul>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content" data-aos="fade-up">
+            <div class="hero-badge">
+                <i class="fas fa-trophy"></i> Профессиональная организация турниров
+            </div>
+            <h1>Турниры без хаоса. Результаты без споров.</h1>
+            <p>Автоматизируйте создание сеток, регистрацию команд и фиксацию результатов. Замените Google Таблицы и Discord на единую платформу с готовыми отчётами.</p>
+            <div class="hero-buttons">
+                <a href="#about" class="btn btn-primary">
+                    <i class="fas fa-rocket"></i> Начать бесплатно
+                </a>
+                <a href="#features" class="btn btn-secondary">
+                    <i class="fas fa-play-circle"></i> Узнать больше
+                </a>
+            </div>
+        </div>
+        <div class="scroll-indicator" onclick="scrollToSection('about')">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about" data-aos="fade-up">
+        <div class="about-content">
+            <div class="about-text">
+                <h3>Платформа нового поколения для киберспорта</h3>
+                <p>TournamentHub — это веб-платформа для организации, проведения и управления любительскими киберспортивными турнирами и клановыми активностями.</p>
+                <p>Мы автоматизируем ключевые процессы: создание турнирных сеток, регистрацию команд, фиксацию результатов, модерацию споров и сбор статистики. Забудьте о ручной работе в Google Таблицах и хаосе в Discord.</p>
+                <a href="#features" class="btn btn-primary" style="margin-top: 1rem;">
+                    <i class="fas fa-cogs"></i> Исследовать возможности
+                </a>
+            </div>
+            <div class="about-stats">
+                <div class="stat-card">
+                    <i class="fas fa-clock"></i>
+                    <h4>70%</h4>
+                    <p>Экономия времени на организацию</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <h4>1000+</h4>
+                    <p>Активных турниров</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h4>0</h4>
+                    <p>Споров о результатах</p>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h4>24/7</h4>
+                    <p>Доступ к статистике</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Target Audience Section -->
+    <section id="audience">
+        <div class="section-title" data-aos="fade-up">
+            <h2>Для кого создана платформа</h2>
+            <p>От индивидуальных игроков до крупных спонсоров — каждый найдёт свои преимущества</p>
+        </div>
+        <div class="audience-grid">
+            <div class="audience-card" data-aos="fade-up" data-aos-delay="0">
+                <div class="audience-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <h3>Организатор</h3>
+                <div class="goal">
+                    <i class="fas fa-arrow-right"></i>
+                    Цель: Провести турнир быстро и без ручного контроля
+                </div>
+                <p>Создавайте турниры за 2 клика, автоматически генерируйте сетки, отслеживайте статус матчей и получайте готовые отчёты для спонсоров.</p>
+            </div>
+
+            <div class="audience-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="audience-icon">
+                    <i class="fas fa-users-cog"></i>
+                </div>
+                <h3>Капитан клана</h3>
+                <div class="goal">
+                    <i class="fas fa-arrow-right"></i>
+                    Цель: Зарегистрировать команду и играть по понятным правилам
+                </div>
+                <p>Заполняйте ростер, получайте расписание матчей, вносите результаты и отслеживайте прогресс команды в турнирной сетке.</p>
+            </div>
+
+            <div class="audience-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="audience-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h3>Игрок-одиночка</h3>
+                <div class="goal">
+                    <i class="fas fa-arrow-right"></i>
+                    Цель: Найти команду и отслеживать личный прогресс
+                </div>
+                <p>Находите турниры для новичков, вступайте в кланы, получайте уведомления о матчах и смотрите свою статистику.</p>
+            </div>
+
+            <div class="audience-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="audience-icon">
+                    <i class="fas fa-gavel"></i>
+                </div>
+                <h3>Модератор/Судья</h3>
+                <div class="goal">
+                    <i class="fas fa-arrow-right"></i>
+                    Цель: Быстро проверять отчёты и разрешать конфликты
+                </div>
+                <p>Проверяйте скриншоты и реплеи, подтверждайте результаты, ведите лог спорных ситуаций и поддерживайте честность турнира.</p>
+            </div>
+
+            <div class="audience-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="audience-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <h3>Спонсор / Представитель вуза</h3>
+                <div class="goal">
+                    <i class="fas fa-arrow-right"></i>
+                    Цель: Получить публичный отчёт и аналитику
+                </div>
+                <p>Смотрите дашборды турниров, скачивайте отчёты в PDF/CSV, отслеживайте активность участников и эффективность вложений.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="section-title" data-aos="fade-up">
+            <h2>Возможности платформы</h2>
+            <p>Всё необходимое для проведения турниров любого масштаба</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="0">
+                <div class="feature-icon">
+                    <i class="fas fa-bracket-tree"></i>
+                </div>
+                <h3>Автогенерация сеток</h3>
+                <p>Single/Double Elimination и Round Robin форматы. Система автоматически создаёт сетки с учётом BYE для нечётного числа команд.</p>
+            </div>
+
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h3>Регистрация команд</h3>
+                <p>Удобная форма регистрации с валидацией ростеров. Капитаны добавляют состав, контакты и информацию о команде за несколько минут.</p>
+            </div>
+
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>Фиксация результатов</h3>
+                <p>Система отчётов с загрузкой скриншотов и реплеев. Подтверждение результатов соперником или модератором исключает споры.</p>
+            </div>
+
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Модерация споров</h3>
+                <p>Флаги CONTESTED для спорных матчей. AI-валидация скриншотов и очередь модераторов для быстрого разрешения конфликтов.</p>
+            </div>
+
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h3>Аналитика и экспорт</h3>
+                <p>Готовые отчёты: регистрации по дням, активность матчей, конверсия. Экспорт в CSV/PDF для спонсоров и вузов.</p>
+            </div>
+
+            <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
+                <div class="feature-icon">
+                    <i class="fas fa-palette"></i>
+                </div>
+                <h3>White-Label брендинг</h3>
+                <p>Кастомные цвета, логотип, скрытие бренда платформы. Встраивание сеток на Twitch/YouTube через iframe.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advantages Section -->
+    <section id="advantages">
+        <div class="section-title" data-aos="fade-up">
+            <h2>Почему выбирают нас</h2>
+            <p>Преимущества перед ручным управлением и аналогами</p>
+        </div>
+        <div class="advantages-list">
+            <div class="advantage-item" data-aos="fade-right">
+                <div class="advantage-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="advantage-content">
+                    <h4>Прозрачные правила</h4>
+                    <p>Чёткий регламент, автоматическое применение правил, никаких скрытых условий</p>
+                </div>
+            </div>
+
+            <div class="advantage-item" data-aos="fade-right" data-aos-delay="100">
+                <div class="advantage-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="advantage-content">
+                    <h4>Экономия времени</h4>
+                    <p>До 70% меньше времени на организацию по сравнению с Google Таблицами</p>
+                </div>
+            </div>
+
+            <div class="advantage-item" data-aos="fade-right" data-aos-delay="200">
+                <div class="advantage-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="advantage-content">
+                    <h4>Защита от фейков</h4>
+                    <p>AI-верификация скриншотов, система репутации, модерация результатов</p>
+                </div>
+            </div>
+
+            <div class="advantage-item" data-aos="fade-right" data-aos-delay="300">
+                <div class="advantage-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="advantage-content">
+                    <h4>Готовые отчёты</h4>
+                    <p>Автоматическая генерация статистики для спонсоров и администрации</p>
+                </div>
+            </div>
+
+            <div class="advantage-item" data-aos="fade-right" data-aos-delay="400">
+                <div class="advantage-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="advantage-content">
+                    <h4>Интеграция с Discord</h4>
+                    <p>Автоматические уведомления, вебхуки, синхронизация ролей</p>
+                </div>
+            </div>
+
+            <div class="advantage-item" data-aos="fade-right" data-aos-delay="500">
+                <div class="advantage-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="advantage-content">
+                    <h4>Масштабируемость</h4>
+                    <p>От небольших турниров на 4 команды до лиг на 128+ участников</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials">
+        <div class="section-title" data-aos="fade-up">
+            <h2>Отзывы пользователей</h2>
+            <p>Что говорят организаторы и игроки о платформе</p>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="0">
+                <div class="testimonial-header">
+                    <div class="testimonial-avatar">АК</div>
+                    <div class="testimonial-info">
+                        <h4>Александр К.</h4>
+                        <span>Организатор студенческой лиги</span>
+                    </div>
+                </div>
+                <div class="testimonial-stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p>«Раньше тратил 10+ часов на составление сеток и отслеживание результатов. Теперь всё автоматически. Студенты довольны прозрачностью, а я экономлю кучу времени!»</p>
+            </div>
+
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="testimonial-header">
+                    <div class="testimonial-avatar">МП</div>
+                    <div class="testimonial-info">
+                        <h4>Мария П.</h4>
+                        <span>Капитан киберспортивного клана</span>
+                    </div>
+                </div>
+                <div class="testimonial-stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </div>
+                <p>«Наконец-то нет споров о результатах! Загрузил скриншот — и всё честно. Очень удобно следить за прогрессом команды в сетке. Рекомендую всем кланам!»</p>
+            </div>
+
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="testimonial-header">
+                    <div class="testimonial-avatar">ДС</div>
+                    <div class="testimonial-info">
+                        <h4>Дмитрий С.</h4>
+                        <span>Представитель вуза</span>
+                    </div>
+                </div>
+                <div class="testimonial-stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                </div>
+                <p>«Отличная аналитика для отчётности. Скачал CSV с данными по всем участникам — идеально для администрации. Платформа выглядит профессионально.»</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq">
+        <div class="section-title" data-aos="fade-up">
+            <h2>Часто задаваемые вопросы</h2>
+            <p>Ответы на популярные вопросы о платформе</p>
+        </div>
+        <div class="faq-container">
+            <div class="faq-item" data-aos="fade-up">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Сколько стоит использование платформы?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Базовый функционал бесплатен навсегда — вы можете создавать турниры до 8 команд без ограничений. Pro-версия стоит 100 рублей в месяц и включает расширенную аналитику, white-label брендинг и приоритетную поддержку.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up" data-aos-delay="100">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Какие игры поддерживаются?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Платформа универсальна — вы можете создавать турниры для любых игр: CS2, Valorant, Dota 2, Rocket League, Minecraft и других. Просто укажите название игры при создании турнира.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up" data-aos-delay="200">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Как происходит верификация результатов?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Капитаны команд загружают скриншоты или ссылки на реплеи после матча. Если обе команды согласны с результатом — он подтверждается автоматически. При разногласиях подключается модератор или AI-валидация (в Pro-версии).</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up" data-aos-delay="300">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Можно ли интегрировать платформу с Discord?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Да! Платформа поддерживает Discord вебхуки для автоматических уведомлений о новых матчах, результатах и изменениях в сетке. В Pro-версии доступна синхронизация ролей.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up" data-aos-delay="400">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Как экспортировать данные для спонсоров?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>В разделе аналитики вы можете сгенерировать отчёт в формате PDF или CSV с данными о регистрациях, активности команд, времени матчей и других метриках. Pro-пользователи получают расширенную статистику.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up" data-aos-delay="500">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Что если команда не явится на матч?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Система автоматически помечает таких участников как "неявка" и продвигает соперника в следующий раунд. Вы можете настроить время ожидания и правила неявки при создании турнира.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing">
+        <div class="pricing" data-aos="zoom-in">
+            <div class="pricing-badge">
+                <i class="fas fa-tag"></i> Лучшая цена
+            </div>
+            <h3>Pro-версия платформы</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Полный доступ ко всем функциям</p>
+            <div class="price">100 ₽<span>/месяц</span></div>
+            <ul class="pricing-features">
+                <li><i class="fas fa-check"></i> Неограниченное количество команд</li>
+                <li><i class="fas fa-check"></i> Расширенная аналитика и отчёты</li>
+                <li><i class="fas fa-check"></i> White-Label брендинг</li>
+                <li><i class="fas fa-check"></i> Кастомный домен</li>
+                <li><i class="fas fa-check"></i> AI-верификация результатов</li>
+                <li><i class="fas fa-check"></i> Приоритетная поддержка 24/7</li>
+                <li><i class="fas fa-check"></i> Экспорт в PDF/CSV</li>
+                <li><i class="fas fa-check"></i> Встраивание на стримы</li>
+            </ul>
+            <br>
+            <a href="" class="btn btn-primary" style="font-size: 1.2rem; padding: 1.25rem 3rem;">
+                <i class="fas fa-credit-card"></i> Оформить подписку
+            </a>
+            <p style="margin-top: 2rem; color: var(--text-secondary); font-size: 0.9rem;">
+                <i class="fas fa-shield-alt"></i> Безопасная оплата • Отмена в любой момент
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>TournamentHub</h4>
+                <p>Профессиональная платформа для организации киберспортивных турниров и управления кланами.</p>
+                <div class="social-links">
+                    <a href="#" aria-label="VK"><i class="fab fa-vk"></i></a>
+                    <a href="#" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="#" aria-label="Discord"><i class="fab fa-discord"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>Платформа</h4>
+                <ul class="footer-links">
+                    <li><a href="#features">Возможности</a></li>
+                    <li><a href="#pricing">Цены</a></li>
+                    <li><a href="#">API</a></li>
+                    <li><a href="#">Интеграции</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Поддержка</h4>
+                <ul class="footer-links">
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#">Документация</a></li>
+                    <li><a href="#">Связаться с нами</a></li>
+                    <li><a href="#">Статус системы</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Контакты</h4>
+                <ul class="footer-links">
+                    <li><i class="fas fa-envelope" style="margin-right: 0.5rem;"></i> support@tournamenthub.ru</li>
+                    <li><i class="fas fa-phone" style="margin-right: 0.5rem;"></i> +7 (999) 123-45-67</li>
+                    <li><i class="fas fa-map-marker-alt" style="margin-right: 0.5rem;"></i> Москва, Россия</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 TournamentHub. Все права защищены. | <a href="#" style="color: var(--text-secondary);">Политика конфиденциальности</a> | <a href="#" style="color: var(--text-secondary);">Условия использования</a></p>
+        </div>
+    </footer>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top" id="scrollTop" onclick="scrollToTop()" aria-label="Наверх">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- AOS Animation Library -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <script>
+        // Initialize AOS Animation Library
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            const scrollTop = document.getElementById('scrollTop');
+            
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+
+            // Show/hide scroll to top button
+            if (window.scrollY > 500) {
+                scrollTop.classList.add('visible');
+            } else {
+                scrollTop.classList.remove('visible');
+            }
+        });
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const overlay = document.querySelector('.overlay');
+            mobileMenu.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+        }
+
+        // Smooth scroll to section
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Scroll to top
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // FAQ Accordion
+        function toggleFaq(element) {
+            const faqItem = element.parentElement;
+            const wasActive = faqItem.classList.contains('active');
+            
+            // Close all FAQ items
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Open clicked item if it wasn't active
+            if (!wasActive) {
+                faqItem.classList.add('active');
+            }
+        }
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add active class to current nav link
+        const sections = document.querySelectorAll('section[id]');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.style.color = '';
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.style.color = 'var(--primary-color)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
